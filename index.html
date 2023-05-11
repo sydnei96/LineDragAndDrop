@@ -1,0 +1,145 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Line Drag and Drop</title>
+</head>
+<style>
+
+    hr 
+    {
+      position:absolute;
+      width: 17%;
+      top: 98px;
+      text-align: left;
+      margin-left: 0;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    canvas
+    {
+      position: absolute;
+      z-index: -1;
+    }
+    
+    .vl {
+        border-left: 2px solid black;
+        top: 90px;
+        height: 25px;
+        position:absolute;
+        left: 80px;
+        pointer-events: none;
+    }
+    </style>
+<body>
+
+<div>
+    <canvas id="canvas" width=320 height=120></canvas>
+<hr>
+</div>
+<div class="vl" style="left:15px">-5</div>
+<div class="vl" style="left:45px">-4</div>
+<div class="vl" style="left:75px">-3</div>
+<div class="vl" style="left:105px">-2</div>
+<div class="vl" style="left:135px">-1</div>
+<div class="vl" style="left:165px">0</div>
+<div class="vl" style="left:195px">1</div>
+<div class="vl" style="left:225px">2</div>
+<div class="vl" style="left:255px">3</div>
+<div class="vl" style="left:285px">4</div>
+<div class="vl" style="left:315px">5</div>
+
+<script type="text/javascript">
+let points = [{x:220,y:100},{x:100,y:100}];
+let dragPoint = -1;
+let pointSize = 6;
+let canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
+
+canvas.onmousedown = function(e) {
+  var pos = getPosition(e);
+  dragPoint = getPointAt(pos.x, pos.y);
+};
+
+canvas.onmousemove = function(e) {
+  if (dragPoint != -1) {
+    var pos = getPosition(e);
+    points[dragPoint].x = pos.x;
+    redraw(); 
+  }
+};
+canvas.onmouseup = function(e) {
+  
+ var pos = getPosition(e);
+ var newLoc = 0;
+ 
+ var r = (pos.x-6) % 30;
+ 
+ if (r <= 15) {
+    newLoc = pos.x - r;
+ }
+ if (r > 15) {
+ 	newLoc = pos.x + (30 - r);
+ }
+    
+ points[dragPoint].x = newLoc;
+ redraw();
+
+ dragPoint = -1;
+
+};
+
+function getPosition(event) {
+  var rect = canvas.getBoundingClientRect();
+  var x = event.clientX - rect.left;
+  var y = event.clientY - rect.top;
+  return {x, y};
+}
+
+function getPointAt(x, y) {
+  for (var i = 0; i < points.length; i++) {
+    if (
+      Math.abs(points[i].x - x) < pointSize &&
+      Math.abs(points[i].y - y) < pointSize
+    )
+      return i;
+  }
+  return -1; 
+}
+
+function redraw() {
+  if (points.length > 0) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawLine()
+    drawCircles()
+  }
+}
+
+function drawLine() {
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 6;
+  points.forEach((p) => {
+    ctx.lineTo(p.x, p.y);
+  })
+  ctx.stroke();
+}
+
+function drawCircles() {
+  ctx.strokeStyle = "black";
+  ctx.lineWidth = 4;
+  points.forEach((p) => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, pointSize, 0, Math.PI * 2, true);
+    ctx.fill()
+    ctx.stroke();
+  })
+}
+
+redraw();
+
+</script>
+</body>
+</html>
